@@ -1,0 +1,74 @@
+#!/bin/bash
+set -e
+
+# This script will automatically install and configure Logstash and Kibana
+
+# Grab the fullpath of our root directory
+ROOT=$(cd `dirname ${BASH_SOURCE[0]}` && echo $PWD)
+
+# We need the newest version of redis so we can use the batch function
+apt-get install -y --force-yes python-software-properties unzip
+add-apt-repository -y ppa:rwky/redis
+apt-get update
+
+apt-get install -y --force-yes redis-server openjdk-7-jre-headless rubygems nginx
+
+# Redis serves as the queue for logstash logs
+sed -ie 's#bind 127.0.0.1#bind 0.0.0.0#' /etc/redis/redis.conf
+# This keeps redis background dumping from crashing if you run low
+# on system memory.
+echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+sysctl -p
+/etc/init.d/redis-server restart
+
+# Install and configure elasticsearch
+wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.3.deb -O /tmp/elasticsearch.deb
+dpkg -i /tmp/elasticsearch.deb
+rm /tmp/elasticsearch.deb
+
+# These configurations are for a large, 192GB Dell R720. You'll need to adjust
+# them for use on any smaller systems.
+#cp $ROOT/etc/elasticsearch/elasticsearch.yml .
+#cp $ROOT/default/elasticsearch /etc/default/elasticsearch
+/etc/init.d/elasticsearch start
+
+# Logstash is just a jar and requires some additional configs
+LOGHOME=/etc/logstash
+mkdir $LOGHOME && pushd $LOGHOME
+wget https://logstash.objects.dreamhost.com/release/logstash-1.2.0-flatjar.jar -O logstash.jar
+cp $ROOT/conf/indexer.conf .
+cp $ROOT/init/logstash.conf /etc/init/
+mkdir /var/lib/logstash # Required working directory for logstash
+service logstash start
+popd
+
+# Install and configure the Kibana frontend
+pushd /opt/
+wget http://download.elasticsearch.org/kibana/kibana/kibana-latest.zip
+unzip kibana-latest.zip
+mv kibana-latest kibana
+pushd kibana
+
+# Copy over our nginx conf and restart
+cp $ROOT/conf/nginx/kibana_nginx_conf /etc/nginx/sites-available/kibana
+ln -s /etc/nginx/sites-available/kibana /etc/nginx/sites-enabled/kibana
+unlink /etc/nginx/sites-enabled/default
+service nginx restart
+
+cat - <<FINISHED
+Elasticsearch installation now complete. 
+
+Services running:
+
+  Logstash indexer
+  Elasticsearch
+  Redis
+  nginx
+
+nginx is serving Kibana on port 80
+
+To start and stop logstash server:
+
+  $ service logstash <start|stop|restart|status>
+
+FINISHED
