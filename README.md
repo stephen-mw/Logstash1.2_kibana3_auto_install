@@ -13,15 +13,15 @@ The server keeps logs in a redis queue until they can be drained into elasticsea
 # The frontend
 While not a direct part of the logstash project, Kibana works on top of logstash to give you visualization and montoring tools. Kibana also gives you the flexibility to define patterns and filters and then watch the stream for these matches as they happen in realtime.
 
-![logstash running with varnishncsa](http://i.imgur.com/SwbL8eO.png?1 "Logstash running with Varnishncsa")
+![logstash running with varnishncsa](http://i.imgur.com/VYXL9op.png "Logstash running with Varnishncsa")
 
 # Setup
-The entire setup has been automated. Simply run:
+The entire setup has been automated. Simply clone the project and run:
 
 ```
-$ sudo ./logstash_server
+$ sudo ./bootstrap
 ```
 
-Elasticsearch, logstash, and redis will be listening on their default port. Kibana will be listening on port 80.
+Elasticsearch, logstash, and redis will be listening on their default port. Kibana/nginx will be listening on port 80.
 
 You may want to change the default data directory for Elasticsearch.
