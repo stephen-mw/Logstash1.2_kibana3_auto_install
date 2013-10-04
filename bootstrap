@@ -7,7 +7,7 @@ set -e
 ROOT=$(cd `dirname ${BASH_SOURCE[0]}` && echo $PWD)
 
 # We need the newest version of redis so we can use the batch function
-apt-get install -y --force-yes python-software-properties unzip
+apt-get install -y --force-yes python-software-properties unzip software-properties-common
 add-apt-repository -y ppa:rwky/redis
 apt-get update
 
