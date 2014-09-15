@@ -56,7 +56,7 @@ unlink /etc/nginx/sites-enabled/default
 service nginx restart
 
 cat - <<FINISHED
-Elasticsearch installation now complete. 
+Elasticsearch installation now complete.
 
 Services running:
 
