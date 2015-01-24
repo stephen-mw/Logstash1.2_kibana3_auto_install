@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/stephen-mw/Logstash1.2_kibana3_auto_install.svg?branch=master)](https://travis-ci.org/stephen-mw/Logstash1.2_kibana3_auto_install)
+
 # What is Logstash?
 Logstash is a log indexer built on top of elasticsearch. It aggregates logs from multiple sources and allows you to query them using the [Apache Lucene query parser syntax](http://lucene.apache.org/core/2_9_4/queryparsersyntax.html).
 

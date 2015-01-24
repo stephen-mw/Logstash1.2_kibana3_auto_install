@@ -3,8 +3,14 @@ set -e
 
 # This script will automatically install and configure Logstash and Kibana
 
+# Keep track of if we're running a travis build
+TRAVIS=$1
+
 # Grab the fullpath of our root directory
 ROOT=$(cd `dirname ${BASH_SOURCE[0]}` && echo $PWD)
+
+apt-get clean
+apt-get update
 
 # We need the newest version of redis so we can use the batch function
 apt-get install -y --force-yes python-software-properties unzip software-properties-common
@@ -17,8 +23,12 @@ apt-get install -y --force-yes redis-server openjdk-7-jre-headless rubygems ngin
 sed -ie 's#bind 127.0.0.1#bind 0.0.0.0#' /etc/redis/redis.conf
 # This keeps redis background dumping from crashing if you run low
 # on system memory.
-echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
-sysctl -p
+
+if [[ -z "${TRAVIS}" ]]; then
+  echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+  sysctl -p
+fi
+
 /etc/init.d/redis-server restart
 
 # Install and configure elasticsearch
